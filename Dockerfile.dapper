@@ -22,6 +22,7 @@ ENV DAPPER_RUN_ARGS="--net host"
 ENV TRASH_CACHE ${DAPPER_SOURCE}/.trash-cache
 ENV HOME ${DAPPER_SOURCE}
 ENV GIT_IN_DAPPER true
+RUN mkdir -p /etc/nginx/geoip
 WORKDIR ${DAPPER_SOURCE}
 ENTRYPOINT ["./scripts/entry"]
 CMD ["ci"]

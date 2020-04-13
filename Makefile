@@ -16,7 +16,7 @@
 all: all-container
 
 # Use the 0.0 tag for testing, it shouldn't clobber any release builds
-TAG ?= 0.25.1
+TAG ?= 0.30.0
 REGISTRY ?= quay.io/kubernetes-ingress-controller
 DOCKER ?= docker
 SED_I ?= sed -i
@@ -45,6 +45,8 @@ PKG = k8s.io/ingress-nginx
 ARCH ?= $(shell go env GOARCH)
 GOARCH = ${ARCH}
 
+BASE_IMAGE ?= quay.io/kubernetes-ingress-controller/nginx
+BASE_TAG ?= c5db20ace43ada5b4c191df24c480fddceb5d482
 
 GOBUILD_FLAGS := -v
 
@@ -123,7 +125,12 @@ else
 endif
 
 	echo "Building docker image..."
-	$(DOCKER) build --no-cache --pull -t $(MULTI_ARCH_IMAGE):$(TAG) $(TEMP_DIR)/rootfs
+	$(DOCKER) build \
+		--no-cache \
+		--pull \
+		--build-arg BASE_IMAGE="$(BASE_IMAGE)-$(ARCH):$(BASE_TAG)" \
+        --build-arg VERSION="$(TAG)" \
+		-t $(MULTI_ARCH_IMAGE):$(TAG) $(TEMP_DIR)/rootfs
 
 
 .PHONY: clean-container

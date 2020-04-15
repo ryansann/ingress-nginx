@@ -52,8 +52,6 @@ GOBUILD_FLAGS := -v
 
 ALL_ARCH = amd64 arm arm64
 
-QEMUVERSION = v4.0.0
-
 BUSTED_ARGS =-v --pattern=_test
 
 GOOS = linux
@@ -73,16 +71,6 @@ export IMAGE
 export E2E_NODES
 export E2E_CHECK_LEAKS
 export SLOW_E2E_THRESHOLD
-
-# Set default base image dynamically for each arch
-BASEIMAGE?=quay.io/kubernetes-ingress-controller/nginx-$(ARCH):0.91
-
-ifeq ($(ARCH),arm)
-	QEMUARCH=arm
-endif
-ifeq ($(ARCH),arm64)
-	QEMUARCH=aarch64
-endif
 
 TEMP_DIR := $(shell mktemp -d)
 
@@ -110,20 +98,7 @@ container: clean-container .container-$(ARCH)
 	mkdir -p $(TEMP_DIR)/rootfs
 	cp bin/$(ARCH)/nginx-ingress-controller $(TEMP_DIR)/rootfs/nginx-ingress-controller
 	cp bin/$(ARCH)/dbg $(TEMP_DIR)/rootfs/dbg
-
 	cp -RP ./* $(TEMP_DIR)
-	$(SED_I) "s|BASEIMAGE|$(BASEIMAGE)|g" $(DOCKERFILE)
-	$(SED_I) "s|QEMUARCH|$(QEMUARCH)|g" $(DOCKERFILE)
-
-ifeq ($(ARCH),amd64)
-	# When building "normally" for amd64, remove the whole line, it has no part in the amd64 image
-	$(SED_I) "/CROSS_BUILD_/d" $(DOCKERFILE)
-else
-	# When cross-building, only the placeholder "CROSS_BUILD_" should be removed
-	curl -sSL https://github.com/multiarch/qemu-user-static/releases/download/$(QEMUVERSION)/x86_64_qemu-$(QEMUARCH)-static.tar.gz | tar -xz -C $(TEMP_DIR)/rootfs
-	$(SED_I) "s/CROSS_BUILD_//g" $(DOCKERFILE)
-endif
-
 	echo "Building docker image..."
 	$(DOCKER) build \
 		--no-cache \
@@ -132,15 +107,9 @@ endif
         --build-arg VERSION="$(TAG)" \
 		-t $(MULTI_ARCH_IMAGE):$(TAG) $(TEMP_DIR)/rootfs
 
-
 .PHONY: clean-container
 clean-container:
 	@$(DOCKER) rmi -f $(MULTI_ARCH_IMAGE):$(TAG) || true
-
-.PHONY: register-qemu
-register-qemu:
-	# Register /usr/bin/qemu-ARCH-static as the handler for binaries in multiple platforms
-	@$(DOCKER) run --rm --privileged multiarch/qemu-user-static:register --reset >&2
 
 .PHONY: push
 push: .push-$(ARCH)

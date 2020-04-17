@@ -22,6 +22,7 @@ RUN wget -O - https://dl.google.com/go/go1.11.4.linux-${!GOLANG_ARCH}.tar.gz | t
 COPY --from=0 /usr/local/bin/docker /usr/bin/docker
 RUN mkdir -p /root/.docker/cli-plugins
 COPY --from=0 /root/.docker/cli-plugins/docker-buildx /root/.docker/cli-plugins/docker-buildx
+ENV DOCKER_CLI_EXPERIMENTAL=enabled
 RUN docker buildx install
 ENV DAPPER_SOURCE /go/src/k8s.io/ingress-nginx/
 ENV DAPPER_OUTPUT ./bin ./dist

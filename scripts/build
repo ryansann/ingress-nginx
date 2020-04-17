@@ -10,25 +10,9 @@ PKG="k8s.io/ingress-nginx"
 rm -rf bin/*
 mkdir -p bin
 
-ARCH=$ARCH source ./scripts/envs
-echo "Building bin/${ARCH}/nginx-ingress-controller"
-OUTPUT_BIN="bin/$ARCH/nginx-ingress-controller"
-export CGO_ENABLED=0 
-GOARCH=$ARCH
-go build \
-    -a -installsuffix cgo \
-    -ldflags="-s -w \
-    -X ${PKG}/version.RELEASE=${TAG} \
-    -X ${PKG}/version.COMMIT=${COMMIT} \
-    -X ${PKG}/version.REPO=${REPO_INFO}" \
-    -o ${OUTPUT_BIN} ${PKG}/cmd/nginx
+declare -a arches=("arm64" "amd64")
 
-echo "Building bin/${ARCH}/dbg"
-OUTPUT_BIN="bin/$ARCH/dbg"
-go build \
-    ${GOBUILD_FLAGS} \
-    -ldflags "-s -w \
-        -X ${PKG}/version.RELEASE=${TAG} \
-        -X ${PKG}/version.COMMIT=${GIT_COMMIT} \
-        -X ${PKG}/version.REPO=${REPO_INFO}" \
-    -o bin/${ARCH}/dbg ${PKG}/cmd/dbg
+for arch in "${arches[@]}"
+do
+   ARCH=$arch make build
+done

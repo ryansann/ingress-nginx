@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$ARCH" = "arm" ]; then
+if [ "$ARCH" = "arm64" ]; then
 	QEMUARCH=arm
 	GOARCH=arm
 	DUMB_ARCH=armhf

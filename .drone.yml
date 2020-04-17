@@ -1,6 +1,6 @@
 ---
 kind: pipeline
-name: amd64
+name: ci
 
 platform:
   os: linux
@@ -23,48 +23,6 @@ steps:
   - docker login -u $USERNAME -p $PASSWORD
   - "docker tag rancher/nginx-ingress-controller-amd64:${DRONE_TAG} rancher/nginx-ingress-controller:${DRONE_TAG}-amd64"
   - "docker push rancher/nginx-ingress-controller:${DRONE_TAG}-amd64"
-  environment:
-    PASSWORD:
-      from_secret: docker_password
-    USERNAME:
-      from_secret: docker_username
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
-  when:
-    event:
-    - tag
-    instance:
-    - drone-publish.rancher.io
-
-volumes:
-- name: docker
-  host:
-    path: /var/run/docker.sock
-
----
-kind: pipeline
-name: arm64
-
-platform:
-  os: linux
-  arch: arm64
-
-steps:
-- name: build
-  image: rancher/dapper:v0.4.1
-  commands:
-  - dapper ci
-  environment:
-    GIT_IN_DAPPER: true
-  volumes:
-  - name: docker
-    path: /var/run/docker.sock
-
-- name: publish-arm64
-  image: docker
-  commands:
-  - docker login -u $USERNAME -p $PASSWORD
   - "docker tag rancher/nginx-ingress-controller-arm64:${DRONE_TAG} rancher/nginx-ingress-controller:${DRONE_TAG}-arm64"
   - "docker push rancher/nginx-ingress-controller:${DRONE_TAG}-arm64"
   environment:
@@ -114,5 +72,4 @@ steps:
     - drone-publish.rancher.io
 
 depends_on:
-- amd64
-- arm64
+- ci

@@ -11,8 +11,7 @@ rm -rf bin/*
 mkdir -p bin
 
 declare -a arches=("arm64" "amd64")
-
 for arch in "${arches[@]}"
 do
-   ARCH=$arch make build
+   ARCH=$arch USE_DOCKER=false make build
 done

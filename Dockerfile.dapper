@@ -1,7 +1,7 @@
 FROM docker:19.03.8
 ARG DAPPER_HOST_ARCH
 ENV ARCH=${DAPPER_HOST_ARCH}
-RUN mkdir -p /root/.docker/cli-plugins
+RUN mkdir -p /.docker/cli-plugins
 RUN apk update && apk upgrade && apk add bash && ln -sf /bin/bash /bin/sh # use bash for subsequent variable expansion
 ENV DOCKER_BUILDX_URL_arm=https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-arm-v7 \
     DOCKER_BUILDX_URL_arm64=https://github.com/docker/buildx/releases/download/v0.3.1/buildx-v0.3.1.linux-arm64 \
